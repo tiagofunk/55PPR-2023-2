@@ -1,66 +1,16 @@
-package br.udesc.exemplomvc;
+package br.udesc.exemplomvc.view;
 
-import java.util.ArrayList;
-import java.util.List;
+import br.udesc.exemplomvc.controller.ControladoraVeiculo;
 
-public class Janela extends javax.swing.JFrame {
+public class Janela extends javax.swing.JFrame implements Observador{
+
+    ControladoraVeiculo controller;
     
-    class Veiculo{
-        private String modelo;
-        private String marca;
-        private int ano;
-
-        /**
-         * @return the modelo
-         */
-        public String getModelo() {
-            return modelo;
-        }
-
-        /**
-         * @param modelo the modelo to set
-         */
-        public void setModelo(String modelo) {
-            this.modelo = modelo;
-        }
-
-        /**
-         * @return the marca
-         */
-        public String getMarca() {
-            return marca;
-        }
-
-        /**
-         * @param marca the marca to set
-         */
-        public void setMarca(String marca) {
-            this.marca = marca;
-        }
-
-        /**
-         * @return the ano
-         */
-        public int getAno() {
-            return ano;
-        }
-
-        /**
-         * @param ano the ano to set
-         */
-        public void setAno(int ano) {
-            this.ano = ano;
-        }
-        
-        
-    }
-
-    private Veiculo veiculoAtual = new Veiculo();
-    private List<Veiculo> listaVeiculos = new ArrayList<>();
-    
-    public Janela() {
+    public Janela( ControladoraVeiculo controller ) {
         initComponents();
         botaoExcluir.setEnabled(false);
+        this.controller = controller;
+        controller.adicionar(this);
     }
 
     @SuppressWarnings("unchecked")
@@ -204,21 +154,11 @@ public class Janela extends javax.swing.JFrame {
 
     private void botaoPesquisarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botaoPesquisarActionPerformed
         String modelo = campoModelo.getText();
-        for(Veiculo v : listaVeiculos) {
-            if(v.getModelo().equals(modelo)) {
-                veiculoAtual = v;
-                campoModelo.setText(veiculoAtual.getModelo());
-                campoMarca.setText(veiculoAtual.getMarca());
-                campoAno.setText(String.valueOf(veiculoAtual.getAno()));
-                botaoExcluir.setEnabled(true);
-                break;
-            }
-        }
+        controller.pesquisar(modelo);
     }//GEN-LAST:event_botaoPesquisarActionPerformed
 
     private void botaoExcluirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botaoExcluirActionPerformed
-        listaVeiculos.remove(veiculoAtual);
-        this.veiculoAtual = new Veiculo();
+        controller.excluir();
         campoModelo.setText("");
         campoMarca.setText("");
         campoAno.setText("");
@@ -229,20 +169,14 @@ public class Janela extends javax.swing.JFrame {
         campoModelo.setText("");
         campoMarca.setText("");
         campoAno.setText("");
-        veiculoAtual = new Veiculo();
+        controller.cancelar();
     }//GEN-LAST:event_botaoCancelarActionPerformed
 
     private void botaoSalvarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botaoSalvarActionPerformed
         String modelo = campoModelo.getText();
         String marca = campoMarca.getText();
         int ano = Integer.parseInt(campoAno.getText());
-        veiculoAtual.setModelo(modelo);
-        veiculoAtual.setMarca(marca);
-        veiculoAtual.setAno(ano);
-        if(!listaVeiculos.contains(veiculoAtual)) {
-            listaVeiculos.add(veiculoAtual);
-        }
-        veiculoAtual = new Veiculo();
+        controller.salvarVeiculo(modelo, marca, ano);
         campoModelo.setText("");
         campoMarca.setText("");
         campoAno.setText("");
@@ -279,7 +213,7 @@ public class Janela extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new Janela().setVisible(true);
+                new Janela(new ControladoraVeiculo() ).setVisible(true);
             }
         });
     }
@@ -296,4 +230,12 @@ public class Janela extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public void notificar(String modelo, String marca, int ano) {
+        campoModelo.setText(modelo);
+        campoMarca.setText( marca );
+        campoAno.setText(String.valueOf(ano ));
+        botaoExcluir.setEnabled(true);
+    }
 }
